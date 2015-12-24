@@ -22,7 +22,7 @@ var FSCONNECTOR = (function() {
 
     var loggingSettings = {
         origin: {
-            module: "FacetScape Visualization"
+            module: "FacetScape"
         }
     };
 
@@ -93,6 +93,7 @@ var FSCONNECTOR = (function() {
                 } else if (event.data.event === 'eexcess.rating') {
                     //console.log("rating");
                 }
+            
             }
         },
         preprocess: function(data) {

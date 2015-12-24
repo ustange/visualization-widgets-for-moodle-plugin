@@ -89,25 +89,30 @@ function requestPlugin() {
     window.onmessage = function(e) {
         if (e.data.event) {
             if (e.data.event === 'eexcess.newResults') {
+                
                 if (globals.queryID && e.data.data.queryID == globals.queryID){
                     console.log('Same query results received ...');
                     return;
                 }
                 //showResults(e.data.data);
                 console.log('New data received ...');
+                globals.origin = e.data.data.profile.origin;
+                console.log('globals.origin',globals.origin)
                 requestVisualization(e.data.data);
+                //window.top.postMessage({event:'dashboardOpened',data:""},'*');
             } else if (e.data.event === 'eexcess.queryTriggered') {
-
+                
             } else if (e.data.event === 'eexcess.error') {
                 //_showError(e.data.data);
             } else if (e.data.event === 'eexcess.rating') {
                 //_rating($('.eexcess_raty[data-uri="' + e.data.data.uri + '"]'), e.data.data.uri, e.data.data.score);
             } else if (e.data.event === 'eexcess.newDashboardSettings') {
+                window.console.log('eexcess.newDashboardSettings dashboard', e.data.settings)
                 visTemplate.updateSettings(e.data.settings);
                 if (e.data.settings.origin != undefined){
                     $.extend(globals.origin, e.data.settings.origin);
                 }
-            }
+            } 
         }
     };
 
@@ -275,10 +280,6 @@ STARTER.mapRecommenderV2toV1 = function(v2data){
             "v2DataItem": v2DataItem
         };
         
-        if (JSON.stringify(v2DataItem).indexOf('wgs84lat') > -1){
-            console.log('wgs84lat found !!');
-        }
-        
         if (v2DataItem.detail){
             console.warn('detail instead of details received !!');
         } 
@@ -289,8 +290,11 @@ STARTER.mapRecommenderV2toV1 = function(v2data){
             details = v2DataItem.detail;
             
         if (details){ 
-            if (details.eexcessProxy && details.eexcessProxy.wgs84lat){
-                v1DataItem.coordinate = [details.eexcessProxy.wgs84lat, details.eexcessProxy.wgs84long];
+            if (details.eexcessProxy 
+                    && details.eexcessProxy.wgs84lat && !isNaN(parseFloat(details.eexcessProxy.wgs84lat))
+                    && details.eexcessProxy.wgs84long && !isNaN(parseFloat(details.eexcessProxy.wgs84long)))
+            {
+                v1DataItem.coordinate = [parseFloat(details.eexcessProxy.wgs84lat), parseFloat(details.eexcessProxy.wgs84long)];
             } else if (details.eexcessProxyEnriched && details.eexcessProxyEnriched.wgs84Point){
                 var listOfPoints = details.eexcessProxyEnriched.wgs84Point;
                 if (listOfPoints.length > 0){
@@ -322,7 +326,8 @@ STARTER.loadEexcessDetails = function(data, queryId, callback){
     for (var i=0; i<data.length; i++){
         detailCallBadges.push(data[i].documentBadge);
     }
-
+    globals.origin.module = 'EEXCESS - Moodle Plugin dashboard';
+    
     var detailscall = $.ajax({
         //url: 'https://eexcess-dev.joanneum.at/eexcess-privacy-proxy-1.0-SNAPSHOT/api/v1/getDetails', // = old dev
         //url: 'https://eexcess-dev.joanneum.at/eexcess-privacy-proxy-issuer-1.0-SNAPSHOT/issuer/getDetails', // = dev
@@ -352,11 +357,14 @@ STARTER.loadEexcessDetails = function(data, queryId, callback){
 };
  
 STARTER.mergeOverviewAndDetailData = function(detailData, data){
+    //console.log("Data / Detail Data:");
+    //console.log(data);
+    //console.log(detailData);
     for (var i=0; i<detailData.documentBadge.length; i++){
         var detailDataItem = detailData.documentBadge[i];
         //var details = JSON.parse(detailDataItem.detail);
         var originalItem = _.find(data, function(dataItem){ return dataItem.documentBadge.id == detailDataItem.id; });
-        //originalItem.details = details;
+        originalItem.details = detailDataItem.detail;
     }
     
     return data;

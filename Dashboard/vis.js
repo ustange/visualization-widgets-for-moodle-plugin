@@ -1,5 +1,12 @@
 function Visualization( EEXCESSobj ) {
-
+    
+	/*var attoEditor = false;
+	window.addEventListener('message',function(e){
+               if(e.data.event === 'attoEditorOpened'){
+                   window.console.log('dashboard - attoEditorOpened');
+                   attoEditor = true;
+                }
+     });*/
 	var self = this;
 	var EEXCESS = EEXCESSobj || {};
 	
@@ -195,6 +202,7 @@ function Visualization( EEXCESSobj ) {
 
         LoggingHandler.init(EXT);
         LoggingHandler.log({ action: "Dashboard opened" });
+        
         BookmarkingAPI = new Bookmarking();
         BookmarkingAPI.init();        
         PluginHandler.initialize(START, root, filterContainer);
@@ -215,11 +223,14 @@ function Visualization( EEXCESSobj ) {
                 }
             }, 1000));
 			
+			Modernizr.load([{test: 'libs/html2canvas.js', load: 'libs/html2canvas.js', complete: function(){
+			}}]);
 			$('#screenshot').on('click', function(){
                 LoggingHandler.log({ action: "Screenshot created" });
 				html2canvas($('#eexcess_vis_panel')[0], {
 					onrendered: function(canvas){
 						window.parent.postMessage({event:'eexcess.screenshot', data: canvas.toDataURL("image/png")}, '*');
+                        
 				}});
 			});
 			
@@ -620,16 +631,17 @@ function Visualization( EEXCESSobj ) {
 
     EVTHANDLER.linkImageClicked = function(d, i){
         d3.event ? d3.event.stopPropagation() : event.stopPropagation();
+		
 		window.parent.postMessage({event:'eexcess.linkImageClicked', data: d}, '*');
         
-		LoggingHandler.log({action: "Link item image clicked", itemId: d.id, itemTitle: d.title });
+		//LoggingHandler.log({action: "Link item image clicked", itemId: d.id, itemTitle: d.title });
     };
 
     EVTHANDLER.linkItemClicked = function(d, i){
         d3.event ? d3.event.stopPropagation() : event.stopPropagation();
 		window.parent.postMessage({event:'eexcess.linkItemClicked', data: d}, '*');
         
-		LoggingHandler.log({action: "Link item clicked", itemId: d.id, itemTitle: d.title });
+		//LoggingHandler.log({action: "Link item clicked", itemId: d.id, itemTitle: d.title });
     };
 
 
@@ -839,9 +851,9 @@ function Visualization( EEXCESSobj ) {
 		
 		visChannelKeys = [];
 		var selColorMappingval = "language"; 
-		if (window.localStorage !== undefined) {
-			if(localStorage.getItem('selected-color-mapping') != null) {
-				selColorMappingval = localStorage.getItem('selected-color-mapping'); 
+		if (window.localStorageCustom !== undefined) {
+			if(localStorageCustom.getItem('selected-color-mapping') != null) {
+				selColorMappingval = localStorageCustom.getItem('selected-color-mapping'); 
 			};
 		}
 		var combIndex = 0; 
@@ -913,8 +925,8 @@ function Visualization( EEXCESSobj ) {
 					var checked = ""; 
                     c.values.forEach(function(v){
                    		if(selColorMappingval == v) {
-                    		/*if (window.localStorage !== undefined) {
-								localStorage.setItem('selected-color-mapping', v);
+                    		/*if (window.localStorageCustom !== undefined) {
+								localStorageCustom.setItem('selected-color-mapping', v);
 							}*/
                             checked = "checked";
                             mappingOptions += "<li><label><input type=\"radio\" name=\"color_mapping\" checked=\""+checked+"\" value=\""+v+"\" />"+ v + "</label></li>";
@@ -968,8 +980,8 @@ function Visualization( EEXCESSobj ) {
 		$(mappingSelectors).each(function(i, item){
             $("input[name=color_mapping][value="+validMapping.facet+"]").attr("checked", "checked");
         });
-        if(window.localStorage!==undefined) {
-        	localStorage.setItem('selected-color-mapping', validMapping.facet);
+        if(window.localStorageCustom!==undefined) {
+        	localStorageCustom.setItem('selected-color-mapping', validMapping.facet);
         }
 	}
 	
@@ -1146,7 +1158,7 @@ function Visualization( EEXCESSobj ) {
 				});
 		}
 
-		if (dashboardSettings.showLinkImageButton){
+		//if(attoEditor){
 			imageContainer.append("a")
 				.attr("class", "link-image")
 				.attr("title", "Embed image")
@@ -1164,16 +1176,20 @@ function Visualization( EEXCESSobj ) {
 					$(this).find('a.link-image').css('display', 'none');
 					$(this).find('img').css('opacity', '');
 				});
-		}
+		
 			
-		if (dashboardSettings.showLinkItemButton){
+		
 			bookmarkDiv.append("a")
 				.attr("class", "link-item")
 				.attr("title", "Embed citation")
 				.on("click", function(d,i) {
 					EVTHANDLER.linkItemClicked(d,i); 
 				});
-		}
+		
+		$('#screenshot').addClass('enabled');
+		
+			
+	//}
 
 		//bookmarkDiv.append("img")
 		//    .attr("class", "eexcess_details_icon")

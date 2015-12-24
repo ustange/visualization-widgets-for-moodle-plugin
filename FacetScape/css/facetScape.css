@@ -320,3 +320,46 @@
     text-align:center;
     vertical-align: middle;
 }
+.insert-citation{
+    position: absolute;
+    left:20%;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    background-image: url(https://eexcess.github.io/visualization-widgets-files/Dashboard/media/icons/link.png);
+}
+.insert-image{
+    display: none;
+    position: absolute;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    background-image: url(https://eexcess.github.io/visualization-widgets-files/Dashboard/media/icons/link.png);
+}
+.resultList-item:hover .insert-image{
+    display: block;
+}
+.insert-citation:hover{
+    cursor: pointer;
+}
+.insert-image:hover{
+    cursor: pointer;
+}
+.insert-citation:hover:after{
+    content: attr(data-title); 
+    position: absolute; 
+    left: 20px; top: 20px; 
+    z-index: 3; 
+    background-color: #ecf9eb; 
+    font-family: Arial, sans-serif; 
+    font-size: 10px;
+}
+.insert-image:hover:after{
+    content: attr(data-title); 
+    position: absolute; 
+    left: 20px; top: 20px; 
+    z-index: 3; 
+    background-color: #ecf9eb; 
+    font-family: Arial, sans-serif; 
+    font-size: 10px;
+}

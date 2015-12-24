@@ -1,5 +1,15 @@
+    var attoEditor = false;
+    window.top.postMessage({event:'facetScapeOpened',data:""},'*');
+    window.addEventListener('message',function(e){
+               if(e.data.event === 'attoEditorOpened'){
+                   //window.console.log('fs - attoEditorOpened');
+                  attoEditor = true;
+                }
+     });
+     
 function facetScape(domElem, iwidth, iheight, ifacets, queryResultItems, term, queryID) {
 
+//window.console.log(attoEditor)
     var root = domElem;
     var svg;
     var spareArea;
@@ -813,11 +823,12 @@ function facetScape(domElem, iwidth, iheight, ifacets, queryResultItems, term, q
     //
     //////////////////////////////////////////////////////////////////////
     var RENDERING = (function() {
+        
         var internal = {
         }
         return {
             drawResultList: function() {
-
+     
                 var results = d3.select("div#RS_ResultList");
                 results.selectAll("div").remove();
 
@@ -836,10 +847,57 @@ function facetScape(domElem, iwidth, iheight, ifacets, queryResultItems, term, q
                         var title = (d.hasOwnProperty("title")) ? d.title : "no title";
                         return title;
                     })
+                    
                     .on("click", function(d, i) {
                         LOGGING.itemOpened(d.documentBadge, queryID);
+                        
                     });
-
+                    if(attoEditor){
+                    singleResultNode.append("div").attr("class","insert-citation").attr("data-title","Insert Citation");
+                    $('.insert-citation').on('click',function(e){
+                        window.parent.postMessage({event: 'eexcess.closeResultsAfterCitation',data:""},'*');
+                        //console.log('FS citation target',$(e.target).parent()[0].__data__)
+                        var item = $(e.target).parent()[0].__data__;
+                        var facets = {
+                            date: item.date,
+                            provider: item.documentBadge.provider
+                        }
+                        var documentBadge = {
+                            id: item.documentBadge.id,
+                            uri: item.documentBadge.uri,
+                            title: item.title,
+                            previewImage: item.previewImage,
+                            facets:facets
+                        }; 
+                
+                        window.top.postMessage({event:'eexcess.linkItemClicked', data:documentBadge}, '*');
+                    });
+                    
+                    
+                    $('.resultList-item-thumbnail').on('load',function(e){
+                        var insImageDiv = $('<div class = "insert-image" data-title = "Insert Image"></div>')
+                        insImageDiv.on('click',function(e){
+                        window.parent.postMessage({event: 'eexcess.closeResultsAfterCitation',data:""},'*');
+                        //console.log('FS image target',$(e.target).parent()[0].__data__)
+                        var item = $(e.target).parent()[0].__data__;
+                        var facets = {
+                            date: item.date,
+                            provider: item.documentBadge.provider
+                        }
+                        var documentBadge = {
+                            id: item.documentBadge.id,
+                            uri: item.documentBadge.uri,
+                            title: item.title,
+                            previewImage: item.previewImage,
+                            facets:facets
+                        };
+                         window.top.postMessage({event:'eexcess.linkImageClicked', data:documentBadge}, '*');
+                    });
+                        $(e.target).parent().append(insImageDiv);
+                        
+                    });
+                    
+                    }
                 var secDesc = singleResultNode.append("div").attr("class", "resultList-item-description")
                     .text(function(d, i) {
                         var desc = [];
@@ -854,6 +912,7 @@ function facetScape(domElem, iwidth, iheight, ifacets, queryResultItems, term, q
                         }
                         return desc.join(" - ");
                     });
+                    
             },
             drawResultList2: function() {
 
@@ -1396,6 +1455,7 @@ function facetScape(domElem, iwidth, iheight, ifacets, queryResultItems, term, q
     //
     //////////////////////////////////////////////////////////////////////
     function init() {
+        
         FSQueryPanel();
 
         if(typeof facets !== 'undefined' && facets.length > 0) {
