@@ -4,6 +4,7 @@ window.onmessage = function (msg) {
     if (msg.data.event) {
         if (msg.data.event === 'eexcess.queryTriggered') {
             // new search has been triggered somewhere, show loading bar or similar
+           
             $(showLoadingBar());
         }
 
