@@ -89,7 +89,8 @@ function addIsotopeGrid(msg) {
                var item = $(e.target).parent();
                var facets = {
                     year: item.attr('itemdate'),
-                    provider: item.attr('provider')
+                    provider: item.attr('provider'),
+                    license: item.attr('licence')
                 }
                var  documentBadge = 
         {
