@@ -26,7 +26,9 @@ window.onmessage = function (msg) {
                 //}, 10);
 
                 lastProcessedQueryID = msg.data.data.queryID;
-                console.log(msg.data);
+                console.log("served from ustange");
+                // console.log(msg.data);
+                window.top.postMessage({event: 'eexcess.newResults', data: msg.data}, '*');
             }
 
         } else if (msg.data.event === 'eexcess.error') {
